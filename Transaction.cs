@@ -16,6 +16,11 @@ public class Transaction
 		To = to;
 		Detail = detail;
 		Amount = amount;
-	
 	}
-}
+
+	public void GenerateTransactionNarrative()
+	{
+		Console.WriteLine($"On {Date}, {From} lent £{Amount} to {To}");
+	}
+
+}	
