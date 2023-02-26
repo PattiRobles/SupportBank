@@ -30,15 +30,21 @@ LogManager.Configuration = config;
 Console.WriteLine("Please enter the year that you would like to review: \nFor 2014 data, enter 1 \nFor 2015 data, enter 2 \nFor 2013 data, enter 3");
 string response = Console.ReadLine();
 
+DataReader dataReader = new DataReader();
+
 if(response == "1") 
 {
     response = "Transactions2014.csv";
 }
 if(response == "2")
 {
-        response = "TRansactions2015.csv";
+    response = "Transactions2015.csv";
 }
-DataReader dataReader = new DataReader();
+if(response == "3")
+{
+    response = "Transactions2013.json";
+    dataReader.ReadJSONTransactionData(response);
+}
 
 PersonalAccount transactions2014 = dataReader.ReadTransactionData(response);
 
