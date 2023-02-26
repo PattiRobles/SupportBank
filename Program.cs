@@ -1,4 +1,15 @@
-﻿using Bank;
+﻿using SupportBank;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+
+var config = new LoggingConfiguration();
+var target = new FileTarget { FileName = @"C:\Training\SupportBank\SupportBank.log", Layout = @"${longdate} ${level} - ${logger}: ${message}" };
+config.AddTarget("File Logger", target);
+config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, target));
+LogManager.Configuration = config;
+
+//creates a log file at location giveb in line 7, copy file path of othe file at same level and change param
 
 //Class Budget: 
 //List<Transactions> 
@@ -6,7 +17,7 @@
 //Method: ListAll
 //Method: ListAccount(takes an User instance)* {loops through transactions and Console.WriteLines any transaction with their name in either to/from }
 //CONSTRUCTOR (*string for the excel filepath*) {
-//Run all the stuff you've got in CSVReader
+//Run all the stuff you've got in DataReader
 // }
 
 //Program.CS:
@@ -16,39 +27,34 @@
 //Class User
 
 //Class Transaction
+Console.WriteLine("Please enter the year that you would like to review: \nFor 2014 data, enter 1 \nFor 2015 data, enter 2 \nFor 2013 data, enter 3");
+string response = Console.ReadLine();
 
-CSVReader csvReader = new CSVReader();
+if(response == "1") 
+{
+    response = "Transactions2014.csv";
+}
+if(response == "2")
+{
+        response = "TRansactions2015.csv";
+}
+DataReader dataReader = new DataReader();
 
-Budget Budget2014 = csvReader.GetTransactionDetails();
+PersonalAccount transactions2014 = dataReader.ReadTransactionData(response);
 
-Console.WriteLine("See all users (1) \n all transactions for individual user (2)");
+Console.WriteLine("Please select from the following options: \nFor all users's balances, enter 1\nFor individual user transactions, enter 2");
 string userOption = Console.ReadLine();
 
 if (userOption == "1")
 {
-	Budget2014.CalculateBalanceAllUsers();
+	transactions2014.CalculateBalanceAllAccountUsers();
 }
 else if (userOption == "2")
 {
-    Budget2014.GetPersonalTransactions();
+    transactions2014.GetPersonalAccountUserTransactions();
 }
+else { Console.WriteLine("Error - incorrect selection, please enter 1 or 2"); }
 
-else { Console.WriteLine("ERROR!"); }
-
-// foreach (Transaction transaction in transactions) {
-
-// Console.WriteLine(transaction.Amount);
-//}
-
-//Budget budgetFor2014: new Budget("*stringforCSVfilepath*"); 
-//bugetFor2014.ListAll(); 
-
-/*List<string> users = new transactions.to.Distinct();
-
-foreach(Transaction user in users) {
-    Console.WriteLine(user);
-}
-*/
 
 
 

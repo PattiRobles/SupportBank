@@ -1,29 +1,53 @@
 
-namespace Bank;
+namespace SupportBank;
+using NLog;
+using Newtonsoft.Json;
 
-//class of yearlyBudget -
-// list of all transactions and all accounts
-// the methods e.g. below to populate those lists; 
-
-public class CSVReader
+public class DataReader
 {
-	public Budget GetTransactionDetails()
+	private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+	public  PersonalAccount ReadTransactionData(string path) //provide path for specific cvs data file
 	{
-		List<User> usersList = new List<User>();
-
-		string path = "Transactions2014.csv";
+		List<AccountUser> usersList = new List<AccountUser>();
+		List<Transaction> allTransactions = new List<Transaction>();
 
 		string[] lines = System.IO.File.ReadAllLines(path);
 
-		List<Transaction> allTransactions = new List<Transaction>();
-		foreach (string line in lines.Skip(1))
+		int rowCounter = 1;
+
+		foreach (string line in lines.Skip(1)) // skit 1st line as column headers
 		{
-			string[] rows = line.Split(',');
-			string date = rows[0];
-			User ToUser = new User(Convert.ToString(rows[1]));
-			User FromUser = new User(Convert.ToString(rows[2]));
-			string details = rows[3];
-			decimal amount = decimal.Parse(rows[4]);
+			rowCounter++;
+			string[] fields = line.Split(','); //creates an array of fields, the different pieces of info in a line
+
+			DateTime date = new DateTime(); // default?? why are we creating another date instance? wouldnt this create a new current date object whe run?
+			try
+			{
+				date = DateTime.Parse(fields[0]);
+			}
+			catch (System.FormatException exception)
+			{
+				Logger.Error($"Error on row {rowCounter}. The date provided is not in the correct format");
+				Console.WriteLine($"Error on row {rowCounter}. The date provided is not in the correct format");
+				throw exception;
+			}
+
+			AccountUser ToUser = new AccountUser(Convert.ToString(fields[1])); // why conver to string? move from type Account user to type string
+
+			AccountUser FromUser = new AccountUser(Convert.ToString(fields[2]));
+
+			string details = fields[3];
+
+			decimal amount;
+			try
+			{
+				amount = decimal.Parse(fields[4]);
+			}
+			catch(System.FormatException exception)
+			{	Logger.Error($"Error on row {rowCounter}. The amount has not been provided is the correct format");
+				Console.WriteLine($"Error on row {rowCounter}. The amount must be entered as a decimal number");
+				throw exception;
+			}
 
 			Transaction uniqueTransaction = new Transaction(date, ToUser, FromUser, details, amount);
 			allTransactions.Add(uniqueTransaction);
@@ -36,8 +60,21 @@ public class CSVReader
 			//Example of UsersList: [{Name: name}, {Name: name}, {Name: name}]
 
 		}
+			Logger.Info($"All data in file {path} read correctly");
+			return new PersonalAccount (usersList, allTransactions);
+	}
+
+	public void ReadJSONTransactionData(string path)
+	{
+		string lines = System.IO.File.ReadAllText(path);
 		
-			return new Budget(usersList, allTransactions);
+			var jsonData = JsonConvert.DeserializeObject<List<TransactionJSON>>(lines);
+			foreach(var transaction in jsonData) {
+				Console.WriteLine(transaction.Amount);
+			}
+			
+
+	
 	}
 }
 
